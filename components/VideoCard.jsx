@@ -64,7 +64,7 @@ const VideoCard = ({ title, creator, avatar, thumbnail, video, videoId, prompt }
               {title}
             </Text>
             <Text className="text-xs text-gray-100 font-pregular" numberOfLines={1}>
-              {creator}
+              {creator.username}
             </Text>
           </View>
         </View>
@@ -78,14 +78,14 @@ const VideoCard = ({ title, creator, avatar, thumbnail, video, videoId, prompt }
         </TouchableOpacity>
         
         <TouchableOpacity className="pt-2" activeOpacity={0.7} onPress={togglePrompt}>
-          <Image source={icons.menu} className="w-5 h-5" resizeMode="contain" />
+          <Image source={icons.eye} className="w-5 h-5" resizeMode="contain" />
         </TouchableOpacity>
-
-        {/* {user && user.$id === creator ? ( // Check if the user is the creator */}
+        
+        {user && user.$id === creator.$id ? ( 
           <TouchableOpacity className="pt-2" activeOpacity={0.7} onPress={deleteVideo}>
-            <Image source={icons.menu} className="w-5 h-5" resizeMode="contain" />
+            <Image source={icons.deleteIcon} className="w-8 h-8" resizeMode="contain" />
           </TouchableOpacity>
-        {/* ) : null} */}
+         ) : null} 
       </View>
 
       {play ? (

@@ -32,7 +32,7 @@ const Create = () => {
     const result = await DocumentPicker.getDocumentAsync({
       type:
         selectType === "image"
-          ? ["image/png", "image/jpg"]
+          ? ["image/png", "image/jpg","image/jpeg"]
           : ["video/mp4", "video/gif"],
     });
 
@@ -172,7 +172,7 @@ const Create = () => {
           title="Submit & Publish"
           handlePress={submit}
           containerStyles="mt-7"
-          isLoading={uploading}
+          isLoadinng={uploading}
         />
       </ScrollView>
     </SafeAreaView>

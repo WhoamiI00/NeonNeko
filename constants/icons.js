@@ -12,7 +12,7 @@ import eyeHide from "../assets/icons/eye-hide.png";
 import eye from "../assets/icons/eye.png";
 import play from "../assets/icons/play.png";
 import heart from "../assets/icons/heart.png";
-
+import deleteIcon from "../assets/icons/delete.png";
 
 export default {
   play,
@@ -29,4 +29,5 @@ export default {
   eyeHide,
   eye,
   heart,
+  deleteIcon,  // Updated key name
 };

@@ -70,8 +70,8 @@ const SignIn = () => {
           <CusButton
             title="Sign In"
             handlePress={submit}
-            containerStyles="mt-7"
-            isLoading={submitting} 
+            containerStyles="mt-7"z
+            isLoadinng={submitting} 
           />
           <View className="justify-center pt-5 flex-row gap-2">
             <Text className="text-lg text-gray-100 font-pregular">

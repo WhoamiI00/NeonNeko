@@ -36,7 +36,7 @@ const Home = () => {
               title={item.title}
               thumbnail={item.thumbnail}
               video={item.video}
-              creator={user ? user.username : 'Unknown Creator'}
+              creator={user ? user : 'Unknown Creator'}
               avatar={user ? user.avatar : null}
               videoId={videoId} // Pass the videoId
               userId={user ? user.$id : null} // Pass the current user's ID if available
