@@ -29,8 +29,8 @@ const Home = () => {
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => {
           const user = item.users;
-          const videoId = item.$id; // Get the video ID
-
+          const videoId = item.$id;
+          const likedBy = item.likedBy;
           return (
             <VideoCard
               title={item.title}
@@ -38,9 +38,11 @@ const Home = () => {
               video={item.video}
               creator={user ? user : 'Unknown Creator'}
               avatar={user ? user.avatar : null}
-              videoId={videoId} // Pass the videoId
-              userId={user ? user.$id : null} // Pass the current user's ID if available
+              videoId={videoId} 
+              userId={user ? user.$id : null} 
               prompt={item.prompt}
+              likedBy={likedBy}
+              isProfile={false}
             />
           );
         }}

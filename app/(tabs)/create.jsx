@@ -50,11 +50,7 @@ const Create = () => {
           video: result.assets[0],
         });
       }
-    } else {
-      setTimeout(() => {
-        Alert.alert("Document picked", JSON.stringify(result, null, 2));
-      }, 100);
-    }
+    } 
   };
 
   const submit = async () => {
@@ -161,7 +157,7 @@ const Create = () => {
         </View>
 
         <FormField
-          title="AI Prompt"
+          title="Caption"
           value={form.prompt}
           placeholder="The AI prompt of your video...."
           handleChangeText={(e) => setForm({ ...form, prompt: e })}

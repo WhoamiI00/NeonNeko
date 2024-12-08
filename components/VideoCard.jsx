@@ -1,34 +1,32 @@
 import { useState, useEffect } from "react";
 import { ResizeMode, Video } from "expo-av";
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
 import { icons } from "../constants";
-import { updateVideoLikes, updateUserLikes, deleteVideoPost } from "../lib/appwrite"; // Import delete function
+import { updateUserLikes, deleteVideoPost } from "../lib/appwrite"; 
 import { useGlobalContext } from "../context/GlobalProvider";
+import { router, usePathname } from "expo-router";
 
-const VideoCard = ({ title, creator, avatar, thumbnail, video, videoId, prompt }) => {
+const VideoCard = ({ title, creator, avatar, thumbnail, video, videoId, prompt, likedBy,isProfile }) => {
+  const pathname = usePathname();
   const { user } = useGlobalContext();
   const [play, setPlay] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [showPrompt, setShowPrompt] = useState(false); // State for prompt visibility
+  const [isLiked, setIsLiked] = useState(false); 
+  const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      const userLikes = user.likedVideos || [];
-      setIsLiked(userLikes.includes(videoId));
+    if (user && likedBy) {
+      setIsLiked(likedBy.some((liker) => liker.$id === user.$id)); 
     }
-  }, [user, videoId]);
+  }, [user, likedBy]);
 
   const liked = async () => {
     if (!user) return;
 
     try {
       const userId = user.$id;
+      await updateUserLikes(userId, videoId,isLiked);
+      setIsLiked(!isLiked);  
 
-      await updateVideoLikes(videoId, userId);
-      const newIsLiked = !isLiked;
-      setIsLiked(newIsLiked);
-
-      await updateUserLikes(userId, videoId);
     } catch (error) {
       console.error("Error updating like:", error.message);
     }
@@ -40,12 +38,16 @@ const VideoCard = ({ title, creator, avatar, thumbnail, video, videoId, prompt }
 
   const deleteVideo = async () => {
     try {
-      await deleteVideoPost(videoId); // Call the delete function
-      // Optionally, you might want to provide feedback to the user or refresh the video list
+      await deleteVideoPost(videoId);
+      Alert("Post Deleted SuccessFully!");
     } catch (error) {
-      console.error("Error deleting video:", error.message);
+      // console.error("Error deleting video:", error.message);
+    } finally {
+      router.replace("/home");
     }
   };
+
+  const creatorId = creator.$id;
 
   return (
     <View className="flex flex-col items-center px-4 mb-14">
@@ -63,12 +65,23 @@ const VideoCard = ({ title, creator, avatar, thumbnail, video, videoId, prompt }
             <Text className="font-psemibold text-sm text-white" numberOfLines={1}>
               {title}
             </Text>
-            <Text className="text-xs text-gray-100 font-pregular" numberOfLines={1}>
+            <Text className="text-xs text-gray-100 font-pregular" numberOfLines={1} 
+              onPress={() => {
+                if (creatorId === "")
+                  return Alert.alert(
+                    "Missing Query",
+                    "Please input something to search results across database"
+                  );
+      
+                if (pathname.startsWith("/search/profile")) router.setParams({ creatorId });
+                else router.push(`/search/profile/${creatorId}`);
+              }}>
               {creator.username}
             </Text>
           </View>
         </View>
 
+        {/* Like button */}
         <TouchableOpacity className="pt-2" activeOpacity={0.7} onPress={liked}>
           <Image 
             source={isLiked ? icons.bookmark : icons.heart} 
@@ -77,15 +90,17 @@ const VideoCard = ({ title, creator, avatar, thumbnail, video, videoId, prompt }
           />
         </TouchableOpacity>
         
+        {/* Prompt button */}
         <TouchableOpacity className="pt-2" activeOpacity={0.7} onPress={togglePrompt}>
-          <Image source={icons.eye} className="w-5 h-5" resizeMode="contain" />
+          <Image source={icons.eye} className="w-7 h-7 bottom-1" resizeMode="contain" />
         </TouchableOpacity>
         
-        {user && user.$id === creator.$id ? ( 
+        {/* Delete button (only for the video creator when in Profile Section) */}
+        {user && isProfile &&user.$id === creator.$id ? ( 
           <TouchableOpacity className="pt-2" activeOpacity={0.7} onPress={deleteVideo}>
-            <Image source={icons.deleteIcon} className="w-8 h-8" resizeMode="contain" />
+            <Image source={icons.deleteIcon} className="w-7 h-7 bottom-1" resizeMode="contain" />
           </TouchableOpacity>
-         ) : null} 
+        ) : null} 
       </View>
 
       {play ? (

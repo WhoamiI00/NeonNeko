@@ -1,23 +1,31 @@
 import { View, Text, FlatList, Image, RefreshControl } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { images } from '../../constants';
 import SearchInput from '../../components/SearchInput';
 import EmptyState from '../../components/EmptyState';
-import { getUserPosts } from '../../lib/appwrite';
+import { getAllPosts } from '../../lib/appwrite';
 import useAppwrite from '../../lib/useAppwrite';
 import VideoCard from '../../components/VideoCard';
 import { useGlobalContext } from '../../context/GlobalProvider';
 
 const Bookmark = () => {
   const { user } = useGlobalContext();
-  const { data: likedPosts, refetch: refetchLikedPosts } = useAppwrite(() => getUserPosts(user.$id));
+  const { data: allPosts, refetch: refetchLikedPosts } = useAppwrite(() => getAllPosts(user.$id));
   const [refreshing, setRefreshing] = useState(false);
+
+  const likedVideoIds = user?.likedVideos?.map((video) => video.$id) || [];
+  const likedPosts = allPosts?.filter((post) => likedVideoIds.includes(post.$id)) || [];
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await refetchLikedPosts();
-    setRefreshing(false);
+    try {
+      await Promise.all([refetchLikedPosts()]);
+    } catch (error) {
+      console.error('Error fetching liked posts:', error);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   return (
@@ -27,17 +35,20 @@ const Bookmark = () => {
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => {
           const videoId = item.$id;
-
+          const likedBy = item.likedBy;
+          const user = item.users;
           return (
             <VideoCard
               title={item.title}
               thumbnail={item.thumbnail}
               video={item.video}
-              creator={item.users ? item.users.username : 'Unknown Creator'}
+              creator={user ? user : 'Unknown Creator'}
               avatar={item.users ? item.users.avatar : null}
               videoId={videoId}
               userId={item.users ? item.users.$id : null}
               prompt={item.prompt}
+              likedBy={likedBy}
+              isProfile={false}
             />
           );
         }}
@@ -52,7 +63,6 @@ const Bookmark = () => {
                   Saved Videos
                 </Text>
               </View>
-
               <View className="mt-1.5">
                 <Image
                   source={images.logoSmall}
@@ -61,14 +71,13 @@ const Bookmark = () => {
                 />
               </View>
             </View>
-
             <SearchInput />
           </View>
         )}
         ListEmptyComponent={() => (
           <EmptyState
             title="No Videos Found"
-            subtitle="BookMark Videos Now"
+            subtitle="Bookmark Videos Now"
           />
         )}
         refreshControl={
